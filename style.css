@@ -309,6 +309,13 @@ h2 {
   cursor: zoom-in;
 }
 
+@media (min-width: 861px) {
+  .avatar {
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+}
+
 .avatar:focus-visible {
   outline: 3px solid var(--primary-color);
   outline-offset: 5px;
