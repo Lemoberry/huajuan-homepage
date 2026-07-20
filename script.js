@@ -44,15 +44,6 @@ const routeLinks = Array.from(document.querySelectorAll("[data-route-link]"));
 const navLinks = Array.from(document.querySelectorAll(".brand[data-route-link], .nav-list [data-route-link], .quick-nav-link[data-route-link]"));
 const revealItems = Array.from(document.querySelectorAll(".reveal"));
 
-const introPhotos = [
-  { src: "assets/huajuan-photo-6.jpg", alt: "花卷生活照片 6" },
-  { src: "assets/huajuan-photo-1.jpg", alt: "花卷生活照片 1" },
-  { src: "assets/huajuan-photo-2.jpg", alt: "花卷生活照片 2" },
-  { src: "assets/huajuan-photo-3.jpg", alt: "花卷生活照片 3" },
-  { src: "assets/huajuan-photo-4.jpg", alt: "花卷生活照片 4" },
-  { src: "assets/huajuan-photo-5.jpg", alt: "花卷生活照片 5" }
-];
-
 const fortunes = [
   {
     text: "今天适合把重要的事放慢一点，把喜欢的事靠近一点。",
@@ -109,7 +100,7 @@ let activeRoute = "";
 let lastImageTrigger = null;
 let scrollTicking = false;
 let copyTimer = null;
-let introTransitionTimer = null;
+let typewriterTimer = null;
 let savedMessages = [];
 let savedProjects = [];
 let savedLifePhotos = [];
@@ -244,11 +235,20 @@ function navigateToRoute(route, options = {}) {
   }
 
   if (route === activeRoute) {
+    if (route === "intro") {
+      runTypewriter(true);
+    }
+
     afterRouteChange({ focusMain, scrollTop, smooth });
     return;
   }
 
   syncView(route);
+
+  if (route === "intro") {
+    runTypewriter(true);
+  }
+
   afterRouteChange({ focusMain, scrollTop, smooth });
 }
 
@@ -360,52 +360,6 @@ function bindZoomableImage(image) {
   });
 }
 
-function applyIntroPhoto(index) {
-  if (!introImage || introPhotos.length === 0) {
-    return;
-  }
-
-  const photo = introPhotos[index % introPhotos.length];
-  introImage.src = photo.src;
-  introImage.alt = photo.alt;
-  introImage.setAttribute("aria-label", `双击放大${photo.alt}`);
-  introImage.dataset.currentPhotoIndex = String(index % introPhotos.length);
-}
-
-function setIntroPhoto(index, animate = false) {
-  if (!animate || prefersReducedMotion.matches) {
-    applyIntroPhoto(index);
-    return;
-  }
-
-  introImage.classList.add("is-changing");
-  window.clearTimeout(introTransitionTimer);
-  introTransitionTimer = window.setTimeout(() => {
-    applyIntroPhoto(index);
-    requestAnimationFrame(() => {
-      introImage.classList.remove("is-changing");
-    });
-  }, 280);
-}
-
-function startIntroSlideshow() {
-  if (!introImage || introPhotos.length <= 1 || prefersReducedMotion.matches) {
-    return;
-  }
-
-  let currentIndex = Number(introImage.dataset.currentPhotoIndex || "0");
-
-  introPhotos.forEach((photo) => {
-    const image = new Image();
-    image.src = photo.src;
-  });
-
-  window.setInterval(() => {
-    currentIndex = (currentIndex + 1) % introPhotos.length;
-    setIntroPhoto(currentIndex, true);
-  }, 5000);
-}
-
 function createTagList(tags, label) {
   const tagList = document.createElement("ul");
   tagList.className = "tag-list";
@@ -515,15 +469,16 @@ function storeLifePhotos() {
   localStorage.setItem(lifePhotoStorageKey, JSON.stringify(savedLifePhotos));
 }
 
-function runTypewriter() {
+function runTypewriter(force = false) {
   const title = document.querySelector("[data-typewriter]");
 
-  if (!title || title.dataset.typed === "true" || prefersReducedMotion.matches) {
+  if (!title || (!force && title.dataset.typed === "true") || prefersReducedMotion.matches) {
     return;
   }
 
   const fullText = title.dataset.typewriter || title.textContent;
   let index = 0;
+  window.clearTimeout(typewriterTimer);
   title.dataset.typed = "true";
   title.textContent = "";
   title.classList.add("is-typing");
@@ -533,9 +488,9 @@ function runTypewriter() {
     title.textContent = fullText.slice(0, index);
 
     if (index < fullText.length) {
-      window.setTimeout(tick, 118);
+      typewriterTimer = window.setTimeout(tick, 118);
     } else {
-      window.setTimeout(() => title.classList.remove("is-typing"), 700);
+      typewriterTimer = window.setTimeout(() => title.classList.remove("is-typing"), 700);
     }
   }
 
@@ -695,8 +650,6 @@ renderProjects();
 renderLifePhotos();
 
 document.querySelectorAll("[data-zoomable-image], #introImage").forEach(bindZoomableImage);
-setIntroPhoto(0);
-startIntroSlideshow();
 
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
@@ -921,4 +874,3 @@ window.addEventListener("hashchange", () => {
 
 const initialRoute = routeFromHash() || "intro";
 navigateToRoute(initialRoute, { push: false, smooth: false });
-runTypewriter();
