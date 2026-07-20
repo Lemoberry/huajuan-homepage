@@ -307,36 +307,22 @@ h2 {
   border: 10px solid var(--surface-color);
   box-shadow: var(--shadow);
   cursor: zoom-in;
+  transform-origin: center;
+  transition: opacity 0.28s ease, transform 0.28s ease;
 }
 
 @media (min-width: 861px) {
   .avatar {
-    aspect-ratio: 1;
+    aspect-ratio: auto;
     height: auto;
-    object-fit: var(--intro-photo-fit, cover);
-    object-position: var(--intro-photo-position, 50% 50%);
-  }
-
-  .life-photo:nth-child(1) {
-    object-position: 54% 48%;
-  }
-
-  .life-photo:nth-child(2),
-  .life-photo:nth-child(5) {
     object-fit: contain;
+    object-position: center;
   }
+}
 
-  .life-photo:nth-child(3) {
-    object-position: 58% 62%;
-  }
-
-  .life-photo:nth-child(4) {
-    object-position: 50% 100%;
-  }
-
-  .life-photo:nth-child(6) {
-    object-position: 58% 50%;
-  }
+.avatar.is-changing {
+  opacity: 0;
+  transform: scale(0.985);
 }
 
 .avatar:focus-visible {

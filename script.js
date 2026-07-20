@@ -45,12 +45,12 @@ const navLinks = Array.from(document.querySelectorAll(".brand[data-route-link], 
 const revealItems = Array.from(document.querySelectorAll(".reveal"));
 
 const introPhotos = [
-  { src: "assets/huajuan-photo-6.jpg", alt: "花卷生活照片 6", fit: "cover", position: "58% 50%" },
-  { src: "assets/huajuan-photo-1.jpg", alt: "花卷生活照片 1", fit: "cover", position: "54% 48%" },
-  { src: "assets/huajuan-photo-2.jpg", alt: "花卷生活照片 2", fit: "contain", position: "50% 50%" },
-  { src: "assets/huajuan-photo-3.jpg", alt: "花卷生活照片 3", fit: "cover", position: "58% 62%" },
-  { src: "assets/huajuan-photo-4.jpg", alt: "花卷生活照片 4", fit: "cover", position: "50% 100%" },
-  { src: "assets/huajuan-photo-5.jpg", alt: "花卷生活照片 5", fit: "contain", position: "50% 50%" }
+  { src: "assets/huajuan-photo-6.jpg", alt: "花卷生活照片 6" },
+  { src: "assets/huajuan-photo-1.jpg", alt: "花卷生活照片 1" },
+  { src: "assets/huajuan-photo-2.jpg", alt: "花卷生活照片 2" },
+  { src: "assets/huajuan-photo-3.jpg", alt: "花卷生活照片 3" },
+  { src: "assets/huajuan-photo-4.jpg", alt: "花卷生活照片 4" },
+  { src: "assets/huajuan-photo-5.jpg", alt: "花卷生活照片 5" }
 ];
 
 const fortunes = [
@@ -109,6 +109,7 @@ let activeRoute = "";
 let lastImageTrigger = null;
 let scrollTicking = false;
 let copyTimer = null;
+let introTransitionTimer = null;
 let savedMessages = [];
 let savedProjects = [];
 let savedLifePhotos = [];
@@ -359,7 +360,7 @@ function bindZoomableImage(image) {
   });
 }
 
-function setIntroPhoto(index) {
+function applyIntroPhoto(index) {
   if (!introImage || introPhotos.length === 0) {
     return;
   }
@@ -367,10 +368,24 @@ function setIntroPhoto(index) {
   const photo = introPhotos[index % introPhotos.length];
   introImage.src = photo.src;
   introImage.alt = photo.alt;
-  introImage.style.setProperty("--intro-photo-fit", photo.fit);
-  introImage.style.setProperty("--intro-photo-position", photo.position);
   introImage.setAttribute("aria-label", `双击放大${photo.alt}`);
   introImage.dataset.currentPhotoIndex = String(index % introPhotos.length);
+}
+
+function setIntroPhoto(index, animate = false) {
+  if (!animate || prefersReducedMotion.matches) {
+    applyIntroPhoto(index);
+    return;
+  }
+
+  introImage.classList.add("is-changing");
+  window.clearTimeout(introTransitionTimer);
+  introTransitionTimer = window.setTimeout(() => {
+    applyIntroPhoto(index);
+    requestAnimationFrame(() => {
+      introImage.classList.remove("is-changing");
+    });
+  }, 280);
 }
 
 function startIntroSlideshow() {
@@ -380,9 +395,14 @@ function startIntroSlideshow() {
 
   let currentIndex = Number(introImage.dataset.currentPhotoIndex || "0");
 
+  introPhotos.forEach((photo) => {
+    const image = new Image();
+    image.src = photo.src;
+  });
+
   window.setInterval(() => {
     currentIndex = (currentIndex + 1) % introPhotos.length;
-    setIntroPhoto(currentIndex);
+    setIntroPhoto(currentIndex, true);
   }, 5000);
 }
 
