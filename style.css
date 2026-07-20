@@ -1235,6 +1235,38 @@ h3 {
     padding-top: 12px;
   }
 
+  .hero-copy {
+    display: contents;
+  }
+
+  .hero-copy .eyebrow {
+    grid-row: 1;
+    margin-bottom: -16px;
+  }
+
+  .hero-copy h1 {
+    grid-row: 2;
+  }
+
+  .avatar-shell {
+    grid-row: 3;
+  }
+
+  .hero-copy .lead {
+    grid-row: 4;
+    margin-top: -6px;
+  }
+
+  .hero-copy .hero-actions {
+    grid-row: 5;
+    margin-top: -4px;
+  }
+
+  .hero-copy .quick-facts {
+    grid-row: 6;
+    margin-top: -2px;
+  }
+
   .avatar {
     max-height: 520px;
   }
